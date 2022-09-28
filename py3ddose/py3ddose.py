@@ -2,15 +2,17 @@ import numpy
 
 
 class DoseFile(object):
-    def __init__(self, file_name, load_uncertainty=False):
+    def __init__(self, file_name, load_uncertainty=False, known_shape =None):
         """
         Attempts to detect the dose file etension automatically. If an unknown
         extension is detected, loads a .3ddose file by default.
         """
+        self.known_shape = known_shape
         if file_name[-3:] == 'npz':
             self._load_npz(file_name)
         else:
             self._load_3ddose(file_name, load_uncertainty)
+
 
     def _load_npz(self, file_name):
         data = numpy.load(file_name)
@@ -30,20 +32,26 @@ class DoseFile(object):
 
         cur_line = 0
 
-        x, y, z = map(int, data[cur_line].split())
+        if self.known_shape is not None:
+            x, y, z = self.known_shape
+        else:
+            x, y, z = map(int, data[cur_line].split())
         self.shape = (z, y, x)
         self.size = numpy.multiply.reduce(self.shape)
 
         cur_line += 1
 
         positions = []
-        for i in range(0, 3):
-            bounds = []
-            while len(bounds) < [x, y, z][i]:
-                line_positions = map(float, data[cur_line].split())
-                bounds += line_positions
-                cur_line += 1
-            positions.append(bounds)
+        try:
+            for i in range(0, 3):
+                bounds = []
+                while len(bounds) < [x, y, z][i]:
+                    line_positions = map(float, data[cur_line].split())
+                    bounds += line_positions
+                    cur_line += 1
+                positions.append(bounds)
+        except IndexError:
+            pass
 
         # recall that dimensions are read in order x, y, z
         positions = [positions[2], positions[1], positions[0]]
