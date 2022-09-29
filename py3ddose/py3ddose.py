@@ -42,16 +42,15 @@ class DoseFile(object):
         cur_line += 1
 
         positions = []
-        try:
-            for i in range(0, 3):
-                bounds = []
-                while len(bounds) < [x, y, z][i]:
-                    line_positions = map(float, data[cur_line].split())
-                    bounds += line_positions
-                    cur_line += 1
-                positions.append(bounds)
-        except IndexError:
-            pass
+        it_x, it_y, it_z = map(int, data[0].split())
+        for i in range(0, 3):
+            bounds = []
+            while len(bounds) < [it_x, it_y, it_z][i]:
+                line_positions = map(float, data[cur_line].split())
+                bounds += line_positions
+                cur_line += 1
+            positions.append(bounds)
+
 
         # recall that dimensions are read in order x, y, z
         positions = [positions[2], positions[1], positions[0]]
@@ -62,9 +61,10 @@ class DoseFile(object):
         self.origin = numpy.add([p[0] for p in positions], numpy.array(self.resolution) / 2.)
 
         assert len(self.resolution) == 3, "Non-linear resolution in either x, y or z."
-
+        print(cur_line)
         dose = []
         while len(dose) < self.size:
+            print(len(dose), self.size, cur_line)
             line_data = map(float, data[cur_line].split())
             dose += line_data
             cur_line += 1
