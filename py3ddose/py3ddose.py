@@ -1,8 +1,9 @@
 import numpy
+import numpy as np
 
 
 class DoseFile(object):
-    def __init__(self, file_name, load_uncertainty=False, known_shape =None):
+    def __init__(self, file_name, load_uncertainty=False, known_shape=None):
         """
         Attempts to detect the dose file etension automatically. If an unknown
         extension is detected, loads a .3ddose file by default.
@@ -61,10 +62,8 @@ class DoseFile(object):
         self.origin = numpy.add([p[0] for p in positions], numpy.array(self.resolution) / 2.)
 
         assert len(self.resolution) == 3, "Non-linear resolution in either x, y or z."
-        print(cur_line)
         dose = []
         while len(dose) < self.size:
-            print(len(dose), self.size, cur_line)
             line_data = map(float, data[cur_line].split())
             dose += line_data
             cur_line += 1
